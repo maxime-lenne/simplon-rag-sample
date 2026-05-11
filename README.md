@@ -29,6 +29,7 @@ embeddings and LLM inference.
 - **Mistral AI** - `mistral-embed` (1024 dims) for embeddings, `mistral-large-latest` for LLM
 - **PostgreSQL + pgvector** - HNSW index for fast approximate nearest-neighbour search
 - **FastAPI REST API** - 8 endpoints under `/api/v1` for ingestion, chat, and evaluation
+- **SvelteKit + Tailwind v4 SPA** - Static chat UI consuming the API directly
 - **Ragas Evaluation** - Faithfulness, answer relevancy, and context recall metrics
 
 ## Tech Stack
@@ -42,6 +43,7 @@ embeddings and LLM inference.
 | Vector Store | PostgreSQL + pgvector |
 | ORM / Migrations | SQLAlchemy (async) + Alembic |
 | API | FastAPI + uvicorn |
+| Frontend | SvelteKit 2 + Svelte 5 + Tailwind CSS v4 (Bun) |
 | RAG Evaluation | Ragas |
 
 ## Quickstart with Docker
@@ -88,9 +90,10 @@ uv sync --extra dev          # dev tools included
 uv run alembic upgrade head
 cd ..
 
-# Install frontend dependencies
+# Install frontend dependencies (requires Bun >= 1.1)
 cd frontend
-uv sync
+cp .env.example .env         # adjust PUBLIC_API_URL if needed
+bun install
 cd ..
 
 # Install git hooks
@@ -104,9 +107,9 @@ pre-commit install
 cd api && uv run python main.py
 # API available at http://localhost:8000/api/v1
 
-# Run the Streamlit chat UI (from frontend/)
-cd frontend && uv run streamlit run src/app/app.py
-# UI available at http://localhost:8501
+# Run the SvelteKit chat UI (from frontend/)
+cd frontend && bun run dev
+# UI available at http://localhost:5173
 ```
 
 ### CLI Tools
