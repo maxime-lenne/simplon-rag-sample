@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-brand-red: #ce0033;
+  --color-brand-coral: #f26f5c;
+  --color-brand-ink: #123744;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f1ee;
+  --color-border-subtle: rgba(18, 55, 68, 0.12);
+
+  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
