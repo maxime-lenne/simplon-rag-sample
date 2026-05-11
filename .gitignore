@@ -52,3 +52,9 @@ skills-lock.json
 
 # Internal docs (local-only)
 docs/
+
+# Frontend (SvelteKit)
+frontend/node_modules
+frontend/.svelte-kit
+frontend/build
+frontend/.env

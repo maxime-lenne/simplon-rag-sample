@@ -14,3 +14,10 @@ repos:
         entry: yamllint
         language: system
         types: [yaml]
+
+      - id: frontend-lint
+        name: frontend lint (prettier + eslint)
+        language: system
+        entry: bash -c 'cd frontend && bun run lint'
+        files: ^frontend/.*\.(ts|js|svelte|css|json)$
+        pass_filenames: false
