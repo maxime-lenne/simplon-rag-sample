@@ -47,30 +47,29 @@ both embeddings and LLM inference.
 
 ## Quickstart with Docker
 
-The fastest way to spin up the full stack (PostgreSQL + API + Streamlit UI):
+The fastest way to spin up the full stack (Ollama + PostgreSQL + API + Streamlit UI):
 
 ```bash
-# 1. Start Ollama on the host and pull the required models (one-time)
-ollama serve &
-ollama pull mistral-small3.2
-ollama pull mistral:latest
-ollama pull mxbai-embed-large
-
-# 2. Configure the environment
+# 1. Configure the environment
 cp api/.env.example api/.env
-# Edit api/.env if you want to point at a non-default Ollama host or use different models
+# Edit api/.env if you want to use different models
 
-# 3. Start the stack in development mode (hot reload, source bind mounts)
+# 2. Start the stack in development mode (hot reload, source bind mounts).
+#    First boot also pulls the Ollama models into the ollama_models volume —
+#    this can take several minutes depending on bandwidth.
 docker compose up -d
 
-# 3. Open the UI
+# 3. Watch model pulling progress (optional)
+docker compose logs -f ollama-init
+
+# 4. Open the UI
 open http://localhost:8501       # Streamlit chat
 # API docs:    http://localhost:8000/docs
 # API health:  http://localhost:8000/api/v1/health
 
-# 4. Tear down
+# 5. Tear down
 docker compose down              # keep data
-docker compose down -v           # also drop the postgres volume
+docker compose down -v           # also drop postgres and ollama volumes
 ```
 
 For a production-like build (multi-worker uvicorn, no source mounts, postgres

@@ -6,6 +6,10 @@ services:
     ports: !reset []
     restart: always
 
+  ollama:
+    ports: !reset []
+    restart: always
+
   api:
     build:
       target: prod
