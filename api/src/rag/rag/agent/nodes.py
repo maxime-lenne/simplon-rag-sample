@@ -2,7 +2,7 @@ import json
 import re
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from langchain_mistralai import ChatMistralAI
+from langchain_ollama import ChatOllama
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,9 +28,12 @@ def _extract_json(content: str) -> str:
     return match.group(0) if match else content
 
 
-def _get_llm(settings=None, model: str = "mistral-large-latest") -> ChatMistralAI:
+def _get_llm(settings=None, model: str | None = None) -> ChatOllama:
     s = settings or get_settings()
-    return ChatMistralAI(model=model, api_key=s.mistral_api_key)
+    return ChatOllama(
+        model=model or s.ollama_chat_model,
+        base_url=s.ollama_base_url,
+    )
 
 
 async def load_history(state: AgentState, db: AsyncSession) -> dict:
@@ -69,7 +72,7 @@ async def guard_route(state: AgentState) -> dict:
     to avoid false negatives.
     """
     settings = get_settings()
-    llm = _get_llm(settings, model="mistral-small-latest")
+    llm = _get_llm(settings, model=settings.ollama_small_chat_model)
     prompt = GUARD_ROUTE_PROMPT.format(
         product_name=settings.product_name,
         user_message=state["user_message"],
@@ -109,7 +112,7 @@ async def retrieve(state: AgentState, db: AsyncSession) -> dict:
 
 
 async def generate(state: AgentState) -> dict:
-    """Generate an answer using Mistral, with optional retrieved context.
+    """Generate an answer using the local Ollama chat model, with optional retrieved context.
 
     The previous turns of the conversation are reused as structured messages
     (HumanMessage / AIMessage) rather than flattened into the system prompt,
@@ -166,7 +169,8 @@ async def evaluate(state: AgentState) -> dict:
     regardless of score to prevent infinite loops.
     Fails open ("answer") on any JSON parsing error.
     """
-    llm = _get_llm(model="mistral-small-latest")
+    settings = get_settings()
+    llm = _get_llm(settings, model=settings.ollama_small_chat_model)
 
     context_summary = "\n".join(
         f"- [{c['filename']}]: {c['content'][:100]}..."

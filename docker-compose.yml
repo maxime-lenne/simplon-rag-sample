@@ -38,6 +38,10 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rag_password}
       APP_ENV: development
       CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:4173,http://localhost:8501"
+      # Ollama runs on the host; api container reaches it via host.docker.internal.
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8000:8000"
     volumes:
