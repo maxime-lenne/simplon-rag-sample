@@ -72,8 +72,14 @@ if "conversation_id" not in st.session_state:
     try:
         st.session_state.conversation_id = create_conversation(API_BASE_URL)
         st.session_state.messages = []
-    except Exception:
+    except (httpx.ConnectError, httpx.ConnectTimeout):
         st.error("Impossible de joindre l'API. Vérifiez que le serveur FastAPI est démarré.")  # noqa: E501
+        st.stop()
+    except httpx.ReadTimeout:
+        st.error("L'API a mis trop de temps à répondre. Rafraîchissez la page pour réessayer.")
+        st.stop()
+    except Exception:
+        st.error("Erreur inattendue lors de la création de la conversation.")
         st.stop()
 
 # --- Render conversation history ---
@@ -106,8 +112,18 @@ if prompt := st.chat_input("Posez votre question…"):
             except httpx.HTTPStatusError as e:
                 st.error(f"Erreur API : {e.response.status_code}")
                 st.stop()
+            except httpx.ReadTimeout:
+                st.error(
+                    "L'API n'a pas répondu dans le délai imparti. La requête est "
+                    "peut-être encore en cours côté serveur — réessayez dans un "
+                    "instant ou augmentez `RAG_API_TIMEOUT_SECONDS`."
+                )
+                st.stop()
+            except (httpx.ConnectError, httpx.ConnectTimeout):
+                st.error("Impossible de joindre l'API (connexion refusée).")
+                st.stop()
             except Exception:
-                st.error("Impossible de joindre l'API.")
+                st.error("Erreur inattendue lors de l'appel à l'API.")
                 st.stop()
 
         st.markdown(content)

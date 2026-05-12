@@ -92,3 +92,17 @@ class TestSendMessage:
         ):
             with pytest.raises(httpx.HTTPStatusError):
                 send_message("http://localhost:8000", "conv-123", "test")
+
+
+class TestTimeoutConfiguration:
+    def test_client_built_with_generous_read_timeout(self):
+        """The httpx client must use a long read timeout so LLM calls don't
+        surface as 'Impossible de joindre l'API' while the API is still
+        processing the request."""
+        mock_client = _mock_client({"content": "ok", "sources": []})
+        with patch("app.api_client.httpx.Client", return_value=mock_client) as ctor:
+            send_message("http://localhost:8000", "conv-123", "Q")
+        timeout = ctor.call_args.kwargs["timeout"]
+        assert isinstance(timeout, httpx.Timeout)
+        assert timeout.read >= 60.0  # at minimum a full minute
+        assert timeout.connect <= 30.0  # connect stays short
